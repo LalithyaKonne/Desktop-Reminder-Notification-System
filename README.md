@@ -79,7 +79,7 @@ python notify.py
 ## Screenshots
 
 Add screenshots of the application interface here.
-<img width="250" height="200" alt="Screenshot 2026-05-26 131519" src="https://github.com/user-attachments/assets/ace244c8-f5a0-41a8-99e7-2a18b5ac08f0" />
+<img width="450" height="400" alt="Screenshot 2026-05-26 131519" src="https://github.com/user-attachments/assets/ace244c8-f5a0-41a8-99e7-2a18b5ac08f0" />
 <img width="250" height="200" alt="Screenshot 2026-05-26 131647" src="https://github.com/user-attachments/assets/ac855ab2-d95d-4fed-bf2e-15965c3448e6" />
 <img width="250" height="200" alt="Screenshot 2026-05-26 131723" src="https://github.com/user-attachments/assets/79183557-55be-43fd-8b88-b14e94c71420" />
 
