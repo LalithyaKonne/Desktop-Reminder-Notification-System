@@ -9,7 +9,20 @@ import os
 from tkcalendar import DateEntry
 import datetime
 import time
+import sqlite3
 
+conn = sqlite3.connect("notifications.db")
+cursor = conn.cursor()
+
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS history(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT,
+    message TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)
+""")
+conn.commit()
 # Initialize pygame mixer
 pygame.mixer.init()
 
@@ -47,8 +60,7 @@ def voice_notification(title):
         print(f"An error occurred while playing the voice notification: {e}")
     finally:
         # Remove the temp file after use
-        if os.path.exists(temp_file.name):
-            os.remove(temp_file.name)
+        pass
 
 # Function to get today's screen time
 def get_today_screen_time():
@@ -63,14 +75,6 @@ def open_notifier():
     notifier_window.geometry("1000x700")
     notifier_window.configure(bg="#e0f7fa")
 
-    try:
-        img = Image.open("notify-label.png")
-        tkimage = ImageTk.PhotoImage(img)
-        img_label = Label(notifier_window, image=tkimage, bg="#e0f7fa")
-        img_label.image = tkimage  # Keep a reference to avoid garbage collection
-        img_label.pack(pady=(20, 0))
-    except FileNotFoundError:
-        print("notify-label.png not found, skipping image loading.")
 
     icon_paths = {
         "eye": "eye.ico",
@@ -171,6 +175,13 @@ def open_notifier():
 
         notification_history.append(f"{title}: {message} (Sent)")
 
+        cursor.execute(
+            "INSERT INTO history(title, message) VALUES (?, ?)",
+            (title, message)
+        )
+        conn.commit()
+
+
         voice_notification(title)
 
     # Function to clear the notification history
@@ -186,8 +197,44 @@ def open_notifier():
     send_all_button.pack(pady=(10, 20))
 
     clear_button = Button(notifier_window, text="Clear Notification History", command=clear_notifications, bg="#e57373", fg="black", font=("Calibri", 12), bd=2, relief="ridge")
+    def view_history():
+        cursor.execute(
+            "SELECT title, message, created_at FROM history ORDER BY id DESC"
+        )
+
+    rows = cursor.fetchall()
+
+    history_window = Toplevel(notifier_window)
+    history_window.title("Database Notification History")
+    history_window.geometry("700x500")
+
+    text_area = Text(history_window, wrap=WORD)
+    text_area.pack(fill=BOTH, expand=True)
+
+    for row in rows:
+        text_area.insert(
+            END,
+            f"Title: {row[0]}\n"
+            f"Message: {row[1]}\n"
+            f"Date: {row[2]}\n"
+            f"{'-'*50}\n"
+        )
     clear_button.pack(pady=(10, 20))
 
+    history_button = Button(
+        notifier_window,
+        text="View Database History",
+        command=view_history,
+        bg="#81c784",
+        fg="black",
+        font=("Calibri", 12),
+        bd=2,
+        relief="ridge"
+    )
+
+    history_button.pack(pady=(10, 20))
+    
+    
 # Exit function
 def exit_application():
     if messagebox.askokcancel("Quit", "Do you really want to quit?"):
